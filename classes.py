@@ -46,7 +46,12 @@ class Flat:  # 认为平面一定平行于XOZ平面
             a = math.sqrt((p_b.x - p_c.x) ** 2 + (p_b.z - p_c.z) ** 2)
             b = math.sqrt((p_c.x - p_a.x) ** 2 + (p_c.z - p_a.z) ** 2)
             c = math.sqrt((p_b.x - p_a.x) ** 2 + (p_b.z - p_a.z) ** 2)
+            if (b ** 2 + c ** 2 - a ** 2) / (2 * b * c) > 1:
+                return math.acos(1)
+            elif (b ** 2 + c ** 2 - a ** 2) / (2 * b * c) < -1:
+                return math.acos(-1)
             alpha = math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c))
+
             return alpha
 
         bete = angle(p, self.p1, self.p2) + angle(p, self.p2, self.p3) + angle(p, self.p3, self.p4) + angle(p, self.p4,

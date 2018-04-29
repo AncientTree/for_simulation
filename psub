@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+# @Time    : 2018-02-10  10:17
+# @Author  : PengZhw
+
+# 这个文件来用迭代器、List实现文件修改，实现备份文件
+import re
+import os.path
+import shutil
+from sys import argv
+
+
+def preprocess(filename_f):
+    """
+
+    :param filename_f:  传递接受自外界的文件路径。
+    :return:    如果路径正确则返回一个列表，每个标签是一项，每项也是一个子列表，
+                子列表包含：1 起始行行号 2 标签名 3 该标签下的列头
+    """
+    # 判断路径有效与否
+    if not os.path.isfile(filename_f):
+        print("%s并非指向一个文件的正确路径，请检查路径正确性，区分大小写、区分'\\'与'/'。" % filename_f)
+        return
+
+    with open(filename_f, 'r')as f:
+
+        # 预处理：寻找结构头（标签）并写入一个二维数组↓
+        line_list = f.readlines()
+        line_number = 0
+        structure_head = []  # 用二维数组来表示结构头及其行号，0：结构头名称；1：行号；2：列头
+        for lineText in line_list:
+            line_number += 1
+            pattern = r'^[\s{0,4}[a-z_A-Z]+\s{0,4}]'
+            match_result = re.match(pattern, lineText)
+            if str(match_result) != 'None':
+                print(line_number, '\t\t' + match_result.group())
+                structure_head.append([line_number, match_result.group()])
+
+        # 寻找每一标签的列头（列名）并写入二维数组↓
+        for headIndex in range(1, len(structure_head) + 1):  # 第 i 个标签下，headIndex = [第几个标签]
+            head_begin_line = structure_head[headIndex - 1][0]  # 设置行起点
+            if headIndex < len(structure_head) - 1:  # 设置列起点
+                head_end_line = structure_head[headIndex][0] - 1
+            else:
+                head_end_line = len(line_list)
+
+            pattern = '.*[a-zA-Z].*'  # 设置匹配模式：只要这一行有至少一个字母就匹配
+            # 编译正则匹配的模式
+            recompile = re.compile(pattern)
+
+            for line_number in range(head_begin_line, head_end_line):  # 第 i 个标签下的5行内，匹配第一个非空行
+                # 重复使用编译过的模式来匹配
+                match_result = recompile.match(line_list[line_number])
+
+                if str(match_result) != 'None':
+                    print(headIndex, structure_head[headIndex - 1][1], '是第' + str(headIndex) + '个非空标签，', end='')
+                    print('它在整个文件文第' + str(line_number) + '行：')
+                    colume_head_match_list = re.split(r'\s+', match_result.group().strip())
+                    structure_head[headIndex - 1].append(colume_head_match_list)
+                    for i in range(1, len(structure_head[headIndex - 1][2])):
+                        print('\t', i, structure_head[headIndex - 1][2][i - 1], end='')
+                    print()
+                    break
+                else:
+                    print(match_result)
+    print('\n用subxc函数修改文件：subxc(<标签序号（1-n）>, <列号（1-m）>, <将被替换的数据>, <用此数据去替换>)；'
+          '\n<标签序号（1-n）>、 <列号（1-m）>均用上面的序号表示；'
+          '\n如将第2个标签的第4列中所有的111改为222，则输入subxc(2, 4, 111, 222)<Enter>。'
+          '\n有些标签下第一个行头对应多个数据，程序待改进。')
+    print(structure_head)
+    return structure_head
+
+
+def subxc(n_tag_will_sub, n_colume_will_sub, old_data, new_data, n_colume_charge=None, charge_value=None):
+    """
+    :param n_tag_will_sub:  这是一个序号，表示文件中第几个标签下的内容将会被修改，其值从1开始而不是从0开始，用在List上时要先减1
+    :param n_colume_will_sub:   类似地，是序号，表示该标签下第几列的内容会被修改，其值从1开始而不是从0开始，用在List上时要先减1
+    :param old_data:    将要被修改的数据
+    :param new_data:    想要修改成的数据
+    :param n_colume_charge:   第多少列需要判断，其值从1开始而不是从0开始，用在List上时要先减1
+    :param charge_value:      判断是不是何值，其值从1开始而不是从0开始，用在List上时要先减1
+    :return:
+    """
+
+    # 生成一个备份文件，备份文件文件名是<源文件名>.bak
+    shutil.copyfile(FILENAME, BAKFILENAME)
+    # 对源文件进行修改
+    print(type(STRUCTURE_HEAD[n_tag_will_sub - 1][0]))
+    b_line = STRUCTURE_HEAD[n_tag_will_sub - 1][0]  # 取出要改动的起始行数
+    e_line = STRUCTURE_HEAD[n_tag_will_sub][0]  # 取出要改动的末端行数
+
+    # 根据要改的列数选择匹配规则
+
+    def write_pattern(datum):
+        pattern_1 = r'^(?P<pre>\s*)(?P<aim>' + str(datum) + r')(?P<pos>.*)$'
+        pattern_2 = r'^(?P<pre>(?:\s+|[0-9a-zA-Z])[0-9a-zA-Z]+\s+)(?P<aim>' + str(datum) + r')(?P<pos>.*)$'
+        pattern_3 = r'^(?P<pre>(?:\s+|[0-9a-zA-Z])[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+)(?P<aim>' + str(
+            datum) + r')(?P<pos>.*)$'
+        pattern_4 = r'^(?P<pre>(?:\s+|[0-9a-zA-Z])[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+' \
+                    r')(?P<aim>' + str(datum) + r')(?P<pos>.*)$'
+        pattern_5 = r'^(?P<pre>(?:\s+|[0-9a-zA-Z])[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+' \
+                    r'[0-9a-zA-Z]+\s+)(?P<aim>' + str(datum) + r')(?P<pos>.*)$'
+        pattern_6 = r'^(?P<pre>(?:\s+|[0-9a-zA-Z])[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+' \
+                    r'[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+)(?P<aim>' + str(datum) + r')(?P<pos>.*)$'
+        pattern_7 = r'^(?P<pre>(?:\s+|[0-9a-zA-Z])[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+' \
+                    r'[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+[0-9a-zA-Z]+\s+)(?P<aim>' + str(datum) + r')(?P<pos>.*)$'
+
+        return [pattern_1, pattern_2, pattern_3, pattern_4, pattern_5, pattern_6, pattern_7]
+
+    """
+    # 选择模式
+    if n_colume_will_sub == 1:
+        pattern = pattern_1
+    elif n_colume_will_sub == 2:
+        pattern = pattern_2
+    elif n_colume_will_sub == 3:
+        pattern = pattern_3
+    elif n_colume_will_sub == 4:
+        pattern = pattern_4
+    elif n_colume_will_sub == 5:
+        pattern = pattern_5
+    elif n_colume_will_sub == 6:
+        pattern = pattern_6
+    elif n_colume_will_sub == 7:
+        pattern = pattern_7
+    """
+
+    sub_pattern_list = write_pattern(old_data)
+    charge_pattern_list = write_pattern(charge_value)
+
+    if MODE == '-a':
+        # 编译
+        print(sub_pattern_list[n_colume_will_sub - 1])
+        re_compile = re.compile(sub_pattern_list[n_colume_will_sub - 1])
+        # 读文件
+        with open(FILENAME, 'r') as fr:
+            file_lines = fr.readlines()
+        for line in range(b_line, e_line):
+            print(file_lines[line - 1])
+            match_result = re_compile.match(file_lines[line - 1])
+            print(match_result)
+            if str(match_result) != 'None':
+                file_lines[line - 1] = '%s%s%s\n' % (match_result.group('pre'),  # 不知道会不会出问题
+                                                     new_data,
+                                                     match_result.group('pos'))
+        with open(r'./new_file.gro', 'w+') as fw:
+            fw.writelines(file_lines)
+
+    if MODE == '-if':
+        # 编译
+        sub_compile = re.compile(sub_pattern_list[n_colume_will_sub - 1])
+        charge_compile = re.compile(charge_pattern_list[n_colume_charge - 1])
+        # 读文件
+        with open(FILENAME, 'r') as fr:
+            file_lines = fr.readlines()
+        for line in range(b_line, e_line):
+            charge_match = charge_compile.match(file_lines[line - 1])
+            aim_match = sub_compile.match(file_lines[line - 1])
+            if str(charge_match) != 'None' and aim_match.group('aim') == str(old_data):
+                file_lines[line - 1] = '%s%s%s\n' % (aim_match.group('pre'),
+                                                     new_data,
+                                                     aim_match.group('pos'))
+        with open(r'./new_file.gro', 'w+') as fw:
+            fw.writelines(file_lines)
+
+
+if '-a' in argv:
+    """
+    argv 接收7个参数:
+    1. 本Python模组的文件名
+    2. '-a'
+    3. FILENAME：   含路径的文件名
+    4. N_TAG：      第几个标签
+    5. N_COLUME：   第几列的数据
+    6. OLD_DATA:    旧数据
+    7. NEW_DATA:    新数据
+    """
+
+    self, MODE, FILENAME, N_TAG, N_COLUME, OLD_DATA, NEW_DATA = argv
+    # FILENAME = r'd:/test.gro'   # 暂时先用固定的路径，以后改为用参数接收输入
+    BAKFILENAME = FILENAME + '.bak'
+
+    print('第一步，用preprocess(<文件路径>)来对想要操作的文件进行预处理：')
+    STRUCTURE_HEAD = preprocess(filename_f=FILENAME)
+    # shutil.copyfile(FILENAME, BAKFILENAME)  # 测试备份是否可用
+    # input("依次输入标签序号 列序号 原始数据 需要改成的数据", )
+    subxc(int(N_TAG), int(N_COLUME), str(OLD_DATA), str(NEW_DATA))  # 把第*个标签下的第*列的所有***改成***
+
+if '-if' in argv:
+    """
+    argv
+    """
+    self, MODE, FILENAME, N_TAG, N_COLUME, OLD_DATA, NEW_DATA, N_COLUME_CHARGE, CHARGE_VALUE = argv
+    BAKFILENAME = FILENAME + '.bak'
+    STRUCTURE_HEAD = preprocess(filename_f=FILENAME)
+    subxc(int(N_TAG), int(N_COLUME), str(OLD_DATA), str(NEW_DATA), int(N_COLUME_CHARGE), str(CHARGE_VALUE))
+
+else:
+    print("请在第一个参数位选择模式，如'-a''-if'等")
+    if len(argv) <= 1:
+        print("无参数接收")
+

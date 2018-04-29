@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # @Time    : 2018-04-11  15:34
 # @Author  : PengZhw
@@ -11,26 +11,48 @@ from sys import argv
 from os import path
 import csv
 import re
-from for_simulation.classes import *
+from classes import *  # 这样写是因为Linux系统能识别同目录下的模组
 
 """
 
 """
 # 自身文件名，数据文件路径，石墨烯规格，输出文件名
 self = argv[0]
-FILE_PATH = argv[1]
-FILE_PREFIX = argv[2]
-SIZE = argv[3]
-OUTPUT_NAME = argv[4]
+# FILE_PATH = argv[1]
+FILE_PREFIX = argv[1]
+SIZE = argv[2]
+OUTPUT_NAME = argv[3]
 
+FILE_PATH = os.getcwd()
 
 # 列表：所有待处理的文件，用re来获取
 FILE_LIST = []
 for file in os.listdir(FILE_PATH):
     match = re.match(FILE_PREFIX + '[0-9]*.pdb', file)
     if str(match) != 'None':
-        print(match.group())
-        FILE_LIST.append(FILE_PATH + match.group())
+        FILE_LIST.append(os.path.join(FILE_PATH, match.group()))
+
+re_digits = re.compile(r'(\d+)')
+
+def emb_numbers(s):
+    pieces = re_digits.split(s)
+    pieces[1::2] = map(int, pieces[1::2])
+    return pieces
+
+
+def sort_strings_with_emb_numbers(alist):
+    aux = [(emb_numbers(s), s) for s in alist]
+    aux.sort()
+    return [s for __, s in aux]
+
+
+def sort_strings_with_emb_numbers2(alist):
+    return sorted(alist, key=emb_numbers)
+
+
+FILE_LIST = sort_strings_with_emb_numbers(FILE_LIST)
+
+
 print(FILE_LIST)
 
 # 测试
@@ -53,6 +75,7 @@ SOLV_NUM = []
 
 
 def read_data(file_path):
+        
     with open(file_path, 'r') as FILE_IN:
         file_lines = FILE_IN.readlines()
 
@@ -177,67 +200,164 @@ def read_10():
     # print('a')
 
 
-read_data('npt02-d-55-6-6.pdb')
+# read_data('npt02-d-55-6-6.pdb')
 
 
-if SIZE == '3':
-    read_3()
-elif SIZE == '5':
-    read_5()
-elif SIZE == '10':
-    read_10()
-else:
-    print("错误: 没有正确输入石墨烯尺寸参数。")
 
-# print("第一层石墨烯有%d个碳原子" % len(GRACS[0]))
 
-"""
-for i in range(len(corner_list)):
-    for j in range(4):
-        print(corner_list[i][j].coordinate)
-"""
-for i in range(len(corner_list)):
-    GRAPHENES.append(Flat(corner_list[i][0], corner_list[i][1], corner_list[i][2], corner_list[i][3]))
 
-print(len(GRAPHENES))
-# GRAPHENES[0].tell_corner()
+def final_cal():
+    if SIZE == '3':
+        read_3()
+    elif SIZE == '5':
+        read_5()
+    elif SIZE == '10':
+        read_10()
+    else:
+        print("错误: 没有正确输入石墨烯尺寸参数。")
 
-outlines = []
+    # print("第一层石墨烯有%d个碳原子" % len(GRACS[0]))
 
-for i in range(len(GRAPHENES) - 1):
-    GRABOXES.append(Box(GRAPHENES[i], GRAPHENES[i + 1]))
-    print("\r第%d、%d层石墨烯构成了一个盒子。" % (i + 1, i + 2))
-    outlines.append("\r\r\r[  Box%d  ]" % (i + 1))
-    outlines.append("\r#第%d、%d层石墨烯构成的一个盒子。" % (i + 1, i + 2))
+    """
+    for i in range(len(corner_list)):
+        for j in range(4):
+            print(corner_list[i][j].coordinate)
+    """
+    for i in range(len(corner_list)):
+        GRAPHENES.append(Flat(corner_list[i][0], corner_list[i][1], corner_list[i][2], corner_list[i][3]))
 
-    outlines.append("\r%12s%12s%12s%12s%12s"
-                    % ('an', 'rn', 'x', 'y', 'z'))
-    n = 0
-    for j in range(len(CO2CS)):
-        if GRABOXES[i].if_inside(CO2CS[j]):
-            n += 1
-            print("原子序号%d，残基序号%d，坐标[x, z, y] = %s。"
-                  % (CO2CS[j].name,
-                     CO2CS[j].mol_n,
-                     str(CO2CS[j].coordinate)))
+    # print(len(GRAPHENES))
+    # GRAPHENES[0].tell_corner()
 
-            outlines.append("\r%12d%12d%12.3f%12.3f%12.3f"
-                            % (CO2CS[j].name,
-                               CO2CS[j].mol_n,
-                               CO2CS[j].x,
-                               CO2CS[j].y,
-                               CO2CS[j].z))
-    outlines[-n - 2] = '\r#总溶剂分子数%12s' % str(n) + outlines[-n - 2]
-    SOLV_NUM.append(n)
+    outlines = []
 
-with open(OUTPUT_NAME, "w+") as FILE_OUT:
-    FILE_OUT.writelines(outlines)
-    print("成功输出文件%s" % OUTPUT_NAME, path.isfile(OUTPUT_NAME))
+    for i in range(len(GRAPHENES) - 1):
+        GRABOXES.append(Box(GRAPHENES[i], GRAPHENES[i + 1]))
+        print("\r第%d、%d层石墨烯构成了一个盒子。" % (i + 1, i + 2))
+        outlines.append("\r\r\r[  Box%d  ]" % (i + 1))
+        outlines.append("\r#第%d、%d层石墨烯构成的一个盒子。" % (i + 1, i + 2))
 
-with open(OUTPUT_NAME, 'r') as f:
-    print(f.read(), os.getcwd())
+        outlines.append("\r%12s%12s%12s%12s%12s"
+                        % ('an', 'rn', 'x', 'y', 'z'))
+        n = 0
+        for j in range(len(CO2CS)):
+            if GRABOXES[i].if_inside(CO2CS[j]):
+                n += 1
+                print("原子序号%d，残基序号%d，坐标[x, z, y] = %s。"
+                      % (CO2CS[j].name,
+                         CO2CS[j].mol_n,
+                         str(CO2CS[j].coordinate)))
 
-print(SOLV_NUM)
+                outlines.append("\r%12d%12d%12.3f%12.3f%12.3f"
+                                % (CO2CS[j].name,
+                                   CO2CS[j].mol_n,
+                                   CO2CS[j].x,
+                                   CO2CS[j].y,
+                                   CO2CS[j].z))
+        outlines[-n - 2] = '\r#总溶剂分子数%12s' % str(n) + outlines[-n - 2]
+        SOLV_NUM.append(n)
+
+    with open(OUTPUT_NAME, "w+") as FILE_OUT:
+        FILE_OUT.writelines(outlines)
+        print("成功输出文件%s" % OUTPUT_NAME, path.isfile(OUTPUT_NAME))
+
+    with open(OUTPUT_NAME, 'r') as f:
+        print(f.read(), os.getcwd())
+
+    print(SOLV_NUM)
+    with open(r'test.csv', 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(SOLV_NUM)
+
+    
+def cal():
+    if SIZE == '3':
+        read_3()
+    elif SIZE == '5':
+        read_5()
+    elif SIZE == '10':
+        read_10()
+    else:
+        print("错误: 没有正确输入石墨烯尺寸参数。")
+
+    # print("第一层石墨烯有%d个碳原子" % len(GRACS[0]))
+
+    """
+    for i in range(len(corner_list)):
+        for j in range(4):
+            print(corner_list[i][j].coordinate)
+    """
+    for i in range(len(corner_list)):
+        GRAPHENES.append(Flat(corner_list[i][0], corner_list[i][1], corner_list[i][2], corner_list[i][3]))
+
+    print(len(GRAPHENES))
+    # GRAPHENES[0].tell_corner()
+
+    outlines = []
+
+    for i in range(len(GRAPHENES) - 1):
+        GRABOXES.append(Box(GRAPHENES[i], GRAPHENES[i + 1]))
+        print("\r第%d、%d层石墨烯构成了一个盒子。" % (i + 1, i + 2))
+        outlines.append("\r\r\r[  Box%d  ]" % (i + 1))
+        outlines.append("\r#第%d、%d层石墨烯构成的一个盒子。" % (i + 1, i + 2))
+
+        outlines.append("\r%12s%12s%12s%12s%12s"
+                        % ('an', 'rn', 'x', 'y', 'z'))
+        n = 0
+        for j in range(len(CO2CS)):
+            if GRABOXES[i].if_inside(CO2CS[j]):
+                n += 1
+                print("原子序号%d，残基序号%d，坐标[x, z, y] = %s。"
+                      % (CO2CS[j].name,
+                         CO2CS[j].mol_n,
+                         str(CO2CS[j].coordinate)))
+
+                outlines.append("\r%12d%12d%12.3f%12.3f%12.3f"
+                                % (CO2CS[j].name,
+                                   CO2CS[j].mol_n,
+                                   CO2CS[j].x,
+                                   CO2CS[j].y,
+                                   CO2CS[j].z))
+        outlines[-n - 2] = '\r#总溶剂分子数%12s' % str(n) + outlines[-n - 2]
+        SOLV_NUM.append(n)
+
+
+
+    print(SOLV_NUM)
+    with open(r'test.csv', 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(SOLV_NUM)
+
 with open(r'test.csv', 'w') as f:
     writer = csv.writer(f)
-    writer.writerow(SOLV_NUM)
+    writer.writerow(["Mol Num in Boxes:"])
+
+
+for n, file_path in enumerate(FILE_LIST):
+    read_data(file_path)
+    print(n, file_path)
+    if n < len(FILE_LIST) - 1:
+        cal()
+    elif n == len(FILE_LIST) - 1:
+        final_cal()
+
+    # 初始化石墨烯片层列表
+    GRAPHENES = []
+
+    # 初始化石墨烯片层间隙列表
+    GRABOXES = []
+
+    # 初始化碳原子列表
+    GRACS = []
+
+    # 初始化二氧化碳列表
+    CO2CS = []
+
+    # 初始化溶剂分子的个数
+    SOLV_NUM = []
+
+    # 初始化corner_list
+    corner_list = []  # {list}corner_list是二维list，第一维是几个石墨烯片层，第二维是每一层的四个角点Point对象
+
+
+
