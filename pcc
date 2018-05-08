@@ -16,12 +16,37 @@ from classes import *  # 这样写是因为Linux系统能识别同目录下的�
 """
 
 """
-# 自身文件名，数据文件路径，石墨烯规格，输出文件名
+
+# 自身文件名，数据文件路径，石墨烯规格，输出文件名,溶剂原子
+
+if '-f' in argv:
+    FILE_PREFIX = argv[1 +  argv.index('-f')]
+else:
+    
+    raise Exception("缺少-f（文件名前缀）参数")
+
+if '-s' in argv:
+    SIZE = argv[1+argv.index('-s')]
+else:
+    raise Exception("缺少-s（石墨烯尺寸）参数，３、５、１０")
+
+if '-o' in argv:
+    OUTPUT_NAME = argv[1+argv.index('-o')]
+else:
+    raise Exception("缺少-o（输出文件名）参数")
+    
+if '-t' in argv:
+    SOLVENT = argv[1+argv.index('-t')]
+else:
+    raise Exception("缺少-t（溶剂中心原子在pdb文件中的名称）参数")   
+
+print(FILE_PREFIX, SIZE, OUTPUT_NAME, SOLVENT)
+
 self = argv[0]
 # FILE_PATH = argv[1]
-FILE_PREFIX = argv[1]
-SIZE = argv[2]
-OUTPUT_NAME = argv[3]
+# FILE_PREFIX = argv[1]
+# SIZE = argv[2]
+# OUTPUT_NAME = argv[3]
 
 FILE_PATH = os.getcwd()
 
@@ -103,14 +128,14 @@ def read_data(file_path):
         sl = line.split()  # sl = sl，切割后的一行，是一个list
 
         # 将二氧化碳碳原子的信息存入list里面
-        if (sl[0] == 'ATOM') and (sl[2] == 'CO'):
+        if (sl[0] == 'ATOM') and (sl[2] == str(SOLVENT)):
             CO2CS.append(CO2C(float(sl[5]), float(sl[7]), float(sl[6]), float(sl[1]), int(sl[4])))
 
     print("石墨烯片层数：", len(GRACS))
     print("第一片石墨烯上第一个碳原子坐标[x, z, y] =", GRACS[0][0].coordinate)
 
-    print("二氧化碳的个数：", len(CO2CS))
-    print("第二个二氧化碳中碳原子坐标[x, z, y] =", CO2CS[1].coordinate)
+    print("溶剂分子(二氧化碳)的个数：", len(CO2CS))
+    print("第二个溶剂分子中中心原子"+str(SOLVENT)+"坐标[x, z, y] =", CO2CS[1].coordinate)
 
 # 石墨烯片层中六边形的边长为1.451A
 L = 1.451

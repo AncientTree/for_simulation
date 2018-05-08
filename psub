@@ -163,6 +163,9 @@ def subxc(n_tag_will_sub, n_colume_will_sub, old_data, new_data, n_colume_charge
         with open(r'./new_file.gro', 'w+') as fw:
             fw.writelines(file_lines)
 
+def packed_pdb_sub:
+    pass
+
 
 if '-a' in argv:
     """
@@ -194,6 +197,9 @@ if '-if' in argv:
     BAKFILENAME = FILENAME + '.bak'
     STRUCTURE_HEAD = preprocess(filename_f=FILENAME)
     subxc(int(N_TAG), int(N_COLUME), str(OLD_DATA), str(NEW_DATA), int(N_COLUME_CHARGE), str(CHARGE_VALUE))
+
+if '-add' in argv:
+    #$ psub -pb FILE_NAME N_COLUME 
 
 else:
     print("请在第一个参数位选择模式，如'-a''-if'等")
