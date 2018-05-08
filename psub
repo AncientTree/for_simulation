@@ -3,6 +3,20 @@
 # @Time    : 2018-02-10  10:17
 # @Author  : PengZhw
 
+
+h = """
+-add FILENAME NAAA MBBB X OUTNAME
+将FILENAME里面从第一个字符串是NAAA的第一行，到第一个字符串是MBBB的最后一行，
+这些行的N、M加上一个数X，且保证修改之后依旧占位8格。
+如：-add complex.gro 1DDR 28DDT 1 complex-ordered.gro
+将把complex.gro中从1DDR 到 28DDT 改成 2DDR 到 29DDT。
+
+-a
+
+-if
+
+
+"""
 # 这个文件来用迭代器、List实现文件修改，实现备份文件
 import re
 import os.path
@@ -163,8 +177,50 @@ def subxc(n_tag_will_sub, n_colume_will_sub, old_data, new_data, n_colume_charge
         with open(r'./new_file.gro', 'w+') as fw:
             fw.writelines(file_lines)
 
-def packed_pdb_sub:
-    pass
+
+def packed_gro_sub(filename, charge_str, end_str, add_number, outname):
+    # 编译
+    pattern = r'^(?P<num>\s*\d+' + r')(?P<str>[a-zA-Z]*)(?P<pos>.*)$'
+    re_compile = re.compile(pattern)
+
+    # 读文件
+    with open(filename, 'r') as fr:
+        file_lines = fr.readlines()
+    startline = 0
+    endline = 0
+    # 计算起始行
+    for line in range(len(file_lines)):
+        match_result = re_compile.match(file_lines[line - 1])
+        print(file_lines[line - 1].split()[0])
+        print(charge_str)
+        if str(match_result) != 'None' and file_lines[line - 1].split()[0] == charge_str:
+            startline = line
+
+            break
+    # 计算结束行
+    if end_str == 'no':
+        endline = 99999999
+    else:
+        for line in range(len(file_lines)):
+            match_result = re_compile.match(file_lines[line - 1])
+            # print(file_lines[line - 1].split()[0])
+            if str(match_result) != 'None' and file_lines[line - 1].split()[0] == end_str:
+                endline = line
+
+            # 结束行用要被改动的最后一行行号，所以不break
+    print(startline)
+    print(endline)
+    for line in range(len(file_lines)):
+        match_result = re_compile.match(file_lines[line - 1])
+        # print(match_result)
+        if str(match_result) != 'None' and endline-1 >= line-1 >= startline-1:
+            file_lines[line - 1] = '%8s%s\n' % (str(int(add_number)+int(match_result.group('num'))).strip()
+                                                +match_result.group('str'),
+                                             match_result.group('pos'))
+        if line-1 == 15953:
+            print(match_result, startline)
+    with open(outname, 'w+', newline='\n') as fw:
+        fw.writelines(file_lines)
 
 
 if '-a' in argv:
@@ -199,7 +255,9 @@ if '-if' in argv:
     subxc(int(N_TAG), int(N_COLUME), str(OLD_DATA), str(NEW_DATA), int(N_COLUME_CHARGE), str(CHARGE_VALUE))
 
 if '-add' in argv:
-    #$ psub -pb FILE_NAME N_COLUME 
+    # $ psub -add FILENAME CHARGE_VALUE ADD_NUMBER
+    self, MODE, FILENAME, CHARGE_STR, END_STR, ADD_NUMBER, OUTNAME = argv
+    packed_gro_sub(FILENAME, CHARGE_STR, END_STR, ADD_NUMBER, OUTNAME)
 
 else:
     print("请在第一个参数位选择模式，如'-a''-if'等")
