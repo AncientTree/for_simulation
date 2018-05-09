@@ -282,15 +282,15 @@ def final_cal():
         outlines[-n - 2] = '\r#总溶剂分子数%12s' % str(n) + outlines[-n - 2]
         SOLV_NUM.append(n)
 
-    with open(OUTPUT_NAME, "w+") as FILE_OUT:
+    with open(OUTPUT_NAME + ".txt", "w+") as FILE_OUT:
         FILE_OUT.writelines(outlines)
         print("成功输出文件%s" % OUTPUT_NAME, path.isfile(OUTPUT_NAME))
 
-    with open(OUTPUT_NAME, 'r') as f:
-        print(f.read(), os.getcwd())
+    # with open(OUTPUT_NAME, 'r') as f:
+    #    print(f.read(), os.getcwd())
 
     print(SOLV_NUM)
-    with open(r'test.csv', 'a') as f:
+    with open(OUTPUT_NAME + '.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerow(SOLV_NUM)
 
@@ -349,13 +349,14 @@ def cal():
 
 
     print(SOLV_NUM)
-    with open(r'test.csv', 'a') as f:
+    with open(OUTPUT_NAME + '.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerow(SOLV_NUM)
 
-with open(r'test.csv', 'w') as f:
+with open(OUTPUT_NAME + '.csv', 'w') as f:
     writer = csv.writer(f)
     writer.writerow(["Mol Num in Boxes:"])
+    
 
 
 for n, file_path in enumerate(FILE_LIST):
@@ -363,6 +364,7 @@ for n, file_path in enumerate(FILE_LIST):
     print(n, file_path)
     if n < len(FILE_LIST) - 1:
         cal()
+        print("文件'test.csv'已写入。")
     elif n == len(FILE_LIST) - 1:
         final_cal()
 
