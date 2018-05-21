@@ -127,9 +127,14 @@ def read_data(file_path):
     for line in file_lines:
         sl = line.split()  # sl = sl，切割后的一行，是一个list
 
-        # 将二氧化碳碳原子的信息存入list里面
+        # 将溶剂中指定原子的信息存入list里面
         if (sl[0] == 'ATOM') and (sl[2] == str(SOLVENT)):
-            CO2CS.append(CO2C(float(sl[5]), float(sl[7]), float(sl[6]), float(sl[1]), int(sl[4])))
+            try:
+                CO2CS.append(CO2C(float(sl[5]), float(sl[7]), float(sl[6]), float(sl[1]), int(sl[4])))
+            except TypeError:
+                print("数据类型错误，这通常意味着第五列不是原子序号而是被其他字符占领了。这一行是\n\
+                %s\n请确保文件无误。" % line)
+            
     '''
     print("石墨烯片层数：", len(GRACS))
     print("第一片石墨烯上第一个碳原子坐标[x, z, y] =", GRACS[0][0].coordinate)
@@ -288,22 +293,19 @@ def final_cal():
         FILE_OUT.writelines(outlines)
         print("成功输出文件%s" % OUTPUT_NAME, path.isfile(OUTPUT_NAME))
 
-<<<<<<< HEAD
+
     '''测试代码块
     with open(OUTPUT_NAME, 'r') as f:
-        print(f.read(), os.getcwd())
-    
-    print(SOLV_NUM)
-    '''
-
-    with open(r'test.csv', 'a') as f:
-=======
+        print(f.read(), os.getcwd())    
+    print(SOLV_NUM)    
+    #with open(r'test.csv', 'a') as f:
     # with open(OUTPUT_NAME, 'r') as f:
     #    print(f.read(), os.getcwd())
+    '''
 
+    
     print(SOLV_NUM)
     with open(OUTPUT_NAME + '.csv', 'a') as f:
->>>>>>> 4b7bc9f50fccf7608347b60a2334b345cf3264f5
         writer = csv.writer(f)
         writer.writerow(SOLV_NUM)
 
@@ -399,6 +401,4 @@ for n, file_path in enumerate(FILE_LIST):
 
     # 初始化corner_list
     corner_list = []  # {list}corner_list是二维list，第一维是几个石墨烯片层，第二维是每一层的四个角点Point对象
-
-
 
