@@ -130,12 +130,13 @@ def read_data(file_path):
         # 将二氧化碳碳原子的信息存入list里面
         if (sl[0] == 'ATOM') and (sl[2] == str(SOLVENT)):
             CO2CS.append(CO2C(float(sl[5]), float(sl[7]), float(sl[6]), float(sl[1]), int(sl[4])))
-
+    '''
     print("石墨烯片层数：", len(GRACS))
     print("第一片石墨烯上第一个碳原子坐标[x, z, y] =", GRACS[0][0].coordinate)
 
     print("溶剂分子(二氧化碳)的个数：", len(CO2CS))
     print("第二个溶剂分子中中心原子"+str(SOLVENT)+"坐标[x, z, y] =", CO2CS[1].coordinate)
+    '''
 
 # 石墨烯片层中六边形的边长为1.451A
 L = 1.451
@@ -268,11 +269,12 @@ def final_cal():
         for j in range(len(CO2CS)):
             if GRABOXES[i].if_inside(CO2CS[j]):
                 n += 1
+                '''测试代码块
                 print("原子序号%d，残基序号%d，坐标[x, z, y] = %s。"
                       % (CO2CS[j].name,
                          CO2CS[j].mol_n,
                          str(CO2CS[j].coordinate)))
-
+                '''
                 outlines.append("\r%12d%12d%12.3f%12.3f%12.3f"
                                 % (CO2CS[j].name,
                                    CO2CS[j].mol_n,
@@ -286,10 +288,13 @@ def final_cal():
         FILE_OUT.writelines(outlines)
         print("成功输出文件%s" % OUTPUT_NAME, path.isfile(OUTPUT_NAME))
 
+    '''测试代码块
     with open(OUTPUT_NAME, 'r') as f:
         print(f.read(), os.getcwd())
-
+    
     print(SOLV_NUM)
+    '''
+
     with open(r'test.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerow(SOLV_NUM)
@@ -322,7 +327,7 @@ def cal():
 
     for i in range(len(GRAPHENES) - 1):
         GRABOXES.append(Box(GRAPHENES[i], GRAPHENES[i + 1]))
-        print("\r第%d、%d层石墨烯构成了一个盒子。" % (i + 1, i + 2))
+        # print("\r第%d、%d层石墨烯构成了一个盒子。" % (i + 1, i + 2))
         outlines.append("\r\r\r[  Box%d  ]" % (i + 1))
         outlines.append("\r#第%d、%d层石墨烯构成的一个盒子。" % (i + 1, i + 2))
 
@@ -332,11 +337,12 @@ def cal():
         for j in range(len(CO2CS)):
             if GRABOXES[i].if_inside(CO2CS[j]):
                 n += 1
+                '''测试代码块
                 print("原子序号%d，残基序号%d，坐标[x, z, y] = %s。"
                       % (CO2CS[j].name,
                          CO2CS[j].mol_n,
                          str(CO2CS[j].coordinate)))
-
+                '''
                 outlines.append("\r%12d%12d%12.3f%12.3f%12.3f"
                                 % (CO2CS[j].name,
                                    CO2CS[j].mol_n,
@@ -360,7 +366,7 @@ with open(r'test.csv', 'w') as f:
 
 for n, file_path in enumerate(FILE_LIST):
     read_data(file_path)
-    print(n, file_path)
+    print('读入文件...', n, file_path)
     if n < len(FILE_LIST) - 1:
         cal()
     elif n == len(FILE_LIST) - 1:
