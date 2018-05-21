@@ -191,8 +191,8 @@ def packed_gro_sub(filename, charge_str, end_str, add_number, outname):
     # 计算起始行
     for line in range(len(file_lines)):
         match_result = re_compile.match(file_lines[line - 1])
-        print(file_lines[line - 1].split()[0])
-        print(charge_str)
+        # print(file_lines[line - 1].split()[0])
+        # print(charge_str)
         if str(match_result) != 'None' and file_lines[line - 1].split()[0] == charge_str:
             startline = line
 
@@ -208,6 +208,32 @@ def packed_gro_sub(filename, charge_str, end_str, add_number, outname):
                 endline = line
 
             # 结束行用要被改动的最后一行行号，所以不break
+    print(startline)
+    print(endline)
+    for line in range(len(file_lines)):
+        match_result = re_compile.match(file_lines[line - 1])
+        # print(match_result)
+        if str(match_result) != 'None' and endline-1 >= line-1 >= startline-1:
+            file_lines[line - 1] = '%8s%s\n' % (str(int(add_number)+int(match_result.group('num'))).strip()
+                                                +match_result.group('str'),
+                                             match_result.group('pos'))
+        if line-1 == 15953:
+            print(match_result, startline)
+    with open(outname, 'w+', newline='\n') as fw:
+        fw.writelines(file_lines)
+        
+        
+def packed_gro_sub_by_line(filename, strat_line, end_line, add_number, outname):
+    # 编译
+    pattern = r'^(?P<num>\s*\d+' + r')(?P<str>[a-zA-Z]*)(?P<pos>.*)$'
+    re_compile = re.compile(pattern)
+
+    # 读文件
+    with open(filename, 'r') as fr:
+        file_lines = fr.readlines()
+    startline = int(strat_line)
+    endline = int(end_line)
+
     print(startline)
     print(endline)
     for line in range(len(file_lines)):
@@ -258,6 +284,11 @@ if '-add' in argv:
     # $ psub -add FILENAME CHARGE_VALUE ADD_NUMBER
     self, MODE, FILENAME, CHARGE_STR, END_STR, ADD_NUMBER, OUTNAME = argv
     packed_gro_sub(FILENAME, CHARGE_STR, END_STR, ADD_NUMBER, OUTNAME)
+
+if '-adl' in argv:
+    # $ psub -add FILENAME CHARGE_VALUE ADD_NUMBER
+    self, MODE, FILENAME, START_LINE, END_LINE, ADD_NUMBER, OUTNAME = argv
+    packed_gro_sub_by_line(FILENAME, START_LINE, END_LINE, ADD_NUMBER, OUTNAME)
 
 else:
     print("请在第一个参数位选择模式，如'-a''-if'等")
