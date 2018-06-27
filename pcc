@@ -11,6 +11,7 @@ from sys import argv
 from os import path
 import csv
 import re
+import shutil
 from classes import *  # 这样写是因为Linux系统能识别同目录下的模组
 import shutil
 import time
@@ -49,9 +50,8 @@ if not PRETREATMENT:
         SOLVENT = argv[1+argv.index('-t')]
     else:
         raise Exception("缺少-t（溶剂中心原子在pdb文件中的名称）参数")
-    print(FILE_PREFIX, SIZE, OUTPUT_NAME, SOLVENT)
-
-
+    
+    print("文件名前缀%s，石墨烯尺寸%s，输出文件名前缀%s，被计算原子%s。"%(FILE_PREFIX, SIZE, OUTPUT_NAME, SOLVENT))
 
 self = argv[0]
 # FILE_PATH = argv[1]
@@ -89,7 +89,7 @@ def sort_strings_with_emb_numbers2(alist):
 FILE_LIST = sort_strings_with_emb_numbers(FILE_LIST)
 
 
-# print(FILE_LIST)
+print("文件列表读入完毕。")
 
 # 测试
 # main()
@@ -343,7 +343,7 @@ def cal():
     for i in range(len(corner_list)):
         GRAPHENES.append(Flat(corner_list[i][0], corner_list[i][1], corner_list[i][2], corner_list[i][3]))
 
-    print(len(GRAPHENES))
+    # print(len(GRAPHENES))
     # GRAPHENES[0].tell_corner()
 
     outlines = []
@@ -376,7 +376,6 @@ def cal():
         SOLV_NUM.append(n)
 
 
-
     # print(SOLV_NUM)
     with open(OUTPUT_NAME + '.csv', 'a') as f:
         writer = csv.writer(f)
@@ -385,7 +384,6 @@ def cal():
 if path.isfile(OUTPUT_NAME+".csv"):
             shutil.copyfile(OUTPUT_NAME + ".csv", '#'+OUTPUT_NAME + ".csv#")
             print("已备份文件%s -> %s"%(OUTPUT_NAME + ".csv", '#'+OUTPUT_NAME + ".csv#"), "备份文件被覆盖后将永久丢失，若希望保留备份文件，请在下次运行本程序之前将其改名。")
-
 
 # re_complie = re.compile(r'^((?:.+\s+){4})(\w+)(.+)$')
 re_complie = re.compile(r'^((?:[0-9a-zA-Z]+\s+){4})([a-zA-Z]+)(.+)$')
@@ -424,9 +422,6 @@ if PRETREATMENT:
         pretreatment(file_path)
 
 
-
-
-
 else:
     with open(OUTPUT_NAME + '.csv', 'w') as f:
         writer = csv.writer(f)
@@ -443,21 +438,4 @@ else:
         elif n == len(FILE_LIST) - 1:
             final_cal()
 
-    # 初始化石墨烯片层列表
-    GRAPHENES = []
-
-    # 初始化石墨烯片层间隙列表
-    GRABOXES = []
-
-    # 初始化碳原子列表
-    GRACS = []
-
-    # 初始化二氧化碳列表
-    CO2CS = []
-
-    # 初始化溶剂分子的个数
-    SOLV_NUM = []
-
-    # 初始化corner_list
-    corner_list = []  # {list}corner_list是二维list，第一维是几个石墨烯片层，第二维是每一层的四个角点Point对象
 
