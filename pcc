@@ -377,10 +377,15 @@ def cal():
 
 
 
-    print(SOLV_NUM)
+    # print(SOLV_NUM)
     with open(OUTPUT_NAME + '.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerow(SOLV_NUM)
+
+if path.isfile(OUTPUT_NAME+".csv"):
+            shutil.copyfile(OUTPUT_NAME + ".csv", '#'+OUTPUT_NAME + ".csv#")
+            print("已备份文件%s -> %s"%(OUTPUT_NAME + ".csv", '#'+OUTPUT_NAME + ".csv#"), "备份文件被覆盖后将永久丢失，若希望保留备份文件，请在下次运行本程序之前将其改名。")
+
 
 # re_complie = re.compile(r'^((?:.+\s+){4})(\w+)(.+)$')
 re_complie = re.compile(r'^((?:[0-9a-zA-Z]+\s+){4})([a-zA-Z]+)(.+)$')
