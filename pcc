@@ -16,10 +16,22 @@ from classes import *  # 这样写是因为Linux系统能识别同目录下的�
 import shutil
 import time
 
-"""
 
-"""
-print("\n===========\n= 程序pcc =\n===========\n")
+
+terminal_columns, terminal_lines = os.get_terminal_size()
+
+name = '=    PCC    ='
+print()
+print("-"*terminal_columns+'\n')
+
+
+print(name.center(terminal_columns-1))
+
+
+print("Version 2018.06.27".center(terminal_columns-1))
+print('\n\n'+"-"*terminal_columns)
+
+# print("\n===========\n= 程序pcc =\n===========\n")
 
 # 自身文件名，数据文件路径，石墨烯规格，输出文件名,溶剂原子
 
@@ -357,15 +369,16 @@ def cal():
         outlines.append("\r%12s%12s%12s%12s%12s"
                         % ('an', 'rn', 'x', 'y', 'z'))
         n = 0
+        
         for j in range(len(CO2CS)):
             if GRABOXES[i].if_inside(CO2CS[j]):
                 n += 1
-                '''测试代码块
-                print("原子序号%d，残基序号%d，坐标[x, z, y] = %s。"
-                      % (CO2CS[j].name,
-                         CO2CS[j].mol_n,
-                         str(CO2CS[j].coordinate)))
-                '''
+                
+                # print("原子序号%d，残基序号%d，坐标[x, z, y] = %s。"
+                #       % (CO2CS[j].name,
+                #          CO2CS[j].mol_n,
+                #          str(CO2CS[j].coordinate)))
+                
                 outlines.append("\r%12d%12d%12.3f%12.3f%12.3f"
                                 % (CO2CS[j].name,
                                    CO2CS[j].mol_n,
@@ -381,9 +394,6 @@ def cal():
         writer = csv.writer(f)
         writer.writerow(SOLV_NUM)
 
-if path.isfile(OUTPUT_NAME+".csv"):
-            shutil.copyfile(OUTPUT_NAME + ".csv", '#'+OUTPUT_NAME + ".csv#")
-            print("已备份文件%s -> %s"%(OUTPUT_NAME + ".csv", '#'+OUTPUT_NAME + ".csv#"), "备份文件被覆盖后将永久丢失，若希望保留备份文件，请在下次运行本程序之前将其改名。")
 
 # re_complie = re.compile(r'^((?:.+\s+){4})(\w+)(.+)$')
 re_complie = re.compile(r'^((?:[0-9a-zA-Z]+\s+){4})([a-zA-Z]+)(.+)$')
@@ -396,10 +406,11 @@ def pretreatment(file_path):
         sl = line.split()
         mr = re.match(re_complie, line)
         if str(mr) != 'None' and sl[0] == 'ATOM':
-            print(file_lines[n]+'替换为\n'+mr.group(1) + " "*len(mr.group(2)) + mr.group(3))
-            print(mr.group(1))
-            print(mr.group(2))
-            print(mr.group(3))
+            if '-print' in argv:
+                print(file_lines[n]+'替换为\n'+mr.group(1) + " "*len(mr.group(2)) + mr.group(3))
+            # print(mr.group(1))
+            # print(mr.group(2))
+            # print(mr.group(3))
             file_lines[n] = mr.group(1) + " "*len(mr.group(2)) + mr.group(3) + '\n'
             # quit()
 
@@ -423,6 +434,11 @@ if PRETREATMENT:
 
 
 else:
+    print("计算……")
+    if path.isfile(OUTPUT_NAME+".csv"):
+            shutil.copyfile(OUTPUT_NAME + ".csv", '#'+OUTPUT_NAME + ".csv#")
+            print("已备份文件%s -> %s"%(OUTPUT_NAME + ".csv", '#'+OUTPUT_NAME + ".csv#"), "备份文件被覆盖后将永久丢失，若希望保留备份文件，请在下次运行本程序之前将其改名。")
+
     with open(OUTPUT_NAME + '.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow(["Mol Num in Boxes:"])
@@ -437,5 +453,24 @@ else:
             print("文件'test.csv'已写入。")
         elif n == len(FILE_LIST) - 1:
             final_cal()
+        
+        
+        # 初始化石墨烯片层列表
+        GRAPHENES = []
+
+        # 初始化石墨烯片层间隙列表
+        GRABOXES = []
+
+        # 初始化碳原子列表
+        GRACS = []
+
+        # 初始化二氧化碳列表
+        CO2CS = []
+
+        # 初始化溶剂分子的个数
+        SOLV_NUM = []
+
+        # 初始化corner_list
+        corner_list = []  # {list}corner_list是二维list，第一维是几个石墨烯片层，第二维是每一层的四个角点Point对象
 
 
