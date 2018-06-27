@@ -12,35 +12,46 @@ from os import path
 import csv
 import re
 from classes import *  # 这样写是因为Linux系统能识别同目录下的模组
+import shutil
+import time
 
 """
 
 """
+print("\n===========\n= 程序pcc =\n===========\n")
 
 # 自身文件名，数据文件路径，石墨烯规格，输出文件名,溶剂原子
 
 if '-f' in argv:
     FILE_PREFIX = argv[1 +  argv.index('-f')]
 else:
-    
     raise Exception("缺少-f（文件名前缀）参数")
 
-if '-s' in argv:
-    SIZE = argv[1+argv.index('-s')]
+# 是否是预处理
+if '-pretreatment' in argv:
+    PRETREATMENT = True
 else:
-    raise Exception("缺少-s（石墨烯尺寸）参数，３、５、１０")
+    PRETREATMENT = False
 
-if '-o' in argv:
-    OUTPUT_NAME = argv[1+argv.index('-o')]
-else:
-    raise Exception("缺少-o（输出文件名）参数")
-    
-if '-t' in argv:
-    SOLVENT = argv[1+argv.index('-t')]
-else:
-    raise Exception("缺少-t（溶剂中心原子在pdb文件中的名称）参数")   
+# 不是预处理模式就接收下面的参数
+if not PRETREATMENT:
+    if '-s' in argv:
+        SIZE = argv[1+argv.index('-s')]
+    else:
+        raise Exception("缺少-s（石墨烯尺寸）参数，３、５、１０")
 
-print(FILE_PREFIX, SIZE, OUTPUT_NAME, SOLVENT)
+    if '-o' in argv:
+        OUTPUT_NAME = argv[1+argv.index('-o')]
+    else:
+        raise Exception("缺少-o（输出文件名）参数")
+
+    if '-t' in argv:
+        SOLVENT = argv[1+argv.index('-t')]
+    else:
+        raise Exception("缺少-t（溶剂中心原子在pdb文件中的名称）参数")
+    print(FILE_PREFIX, SIZE, OUTPUT_NAME, SOLVENT)
+
+
 
 self = argv[0]
 # FILE_PATH = argv[1]
@@ -78,7 +89,7 @@ def sort_strings_with_emb_numbers2(alist):
 FILE_LIST = sort_strings_with_emb_numbers(FILE_LIST)
 
 
-print(FILE_LIST)
+# print(FILE_LIST)
 
 # 测试
 # main()
@@ -290,9 +301,11 @@ def final_cal():
         SOLV_NUM.append(n)
 
     with open(OUTPUT_NAME + ".txt", "w+") as FILE_OUT:
+        if path.isfile(OUTPUT_NAME+".txt"):
+            shutil.copyfile(OUTPUT_NAME + ".txt", '#'+OUTPUT_NAME + ".txt#")
+            print("已备份文件%s -> %s"%(OUTPUT_NAME + ".txt", '#'+OUTPUT_NAME + ".txt#"), "备份文件被覆盖后将永久丢失，若希望保留备份文件，请在下次运行本程序之前将其改名。")
         FILE_OUT.writelines(outlines)
-        print("成功输出文件%s" % OUTPUT_NAME, path.isfile(OUTPUT_NAME))
-
+        print("成功输出文件%s" % OUTPUT_NAME+".txt")
 
     '''测试代码块
     with open(OUTPUT_NAME, 'r') as f:
@@ -304,7 +317,7 @@ def final_cal():
     '''
 
     
-    print(SOLV_NUM)
+    # print(SOLV_NUM)
     with open(OUTPUT_NAME + '.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerow(SOLV_NUM)
@@ -369,20 +382,61 @@ def cal():
         writer = csv.writer(f)
         writer.writerow(SOLV_NUM)
 
-with open(OUTPUT_NAME + '.csv', 'w') as f:
-    writer = csv.writer(f)
-    writer.writerow(["Mol Num in Boxes:"])
-    
+# re_complie = re.compile(r'^((?:.+\s+){4})(\w+)(.+)$')
+re_complie = re.compile(r'^((?:[0-9a-zA-Z]+\s+){4})([a-zA-Z]+)(.+)$')
+# 预处理函数
+def pretreatment(file_path):
+    with open(file_path, 'r') as FILE_IN:
+        file_lines = FILE_IN.readlines()
+    print('读入文件...', file_path)
+    for n, line in enumerate(file_lines):     # mr = match_result
+        sl = line.split()
+        mr = re.match(re_complie, line)
+        if str(mr) != 'None' and sl[0] == 'ATOM':
+            print(file_lines[n]+'替换为\n'+mr.group(1) + " "*len(mr.group(2)) + mr.group(3))
+            print(mr.group(1))
+            print(mr.group(2))
+            print(mr.group(3))
+            file_lines[n] = mr.group(1) + " "*len(mr.group(2)) + mr.group(3) + '\n'
+            # quit()
+
+    # 备份
+    path, basename = os.path.split(file_path)
+    short_name, extension = os.path.splitext(basename)
+
+    time_str = time.strftime("#%Y%m%d_%H-%M-%S#",time.localtime(time.time()))
+    shutil.copy(file_path, os.path.join(path, time_str+short_name+extension))
+    print('*' * 10 + "\n备份文件" + basename + "至" + os.path.join(path, time_str+short_name+extension))
+
+    # 写入
+    with open(file_path, 'w+')as fw:
+        fw.writelines(file_lines)
 
 
-for n, file_path in enumerate(FILE_LIST):
-    read_data(file_path)
-    print('读入文件...', n, file_path)
-    if n < len(FILE_LIST) - 1:
-        cal()
-        print("文件'test.csv'已写入。")
-    elif n == len(FILE_LIST) - 1:
-        final_cal()
+if PRETREATMENT:
+    print("\n预处理……\n")
+    for n, file_path in enumerate(FILE_LIST):
+        pretreatment(file_path)
+
+
+
+
+
+else:
+    with open(OUTPUT_NAME + '.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(["Mol Num in Boxes:"])
+
+
+
+    for n, file_path in enumerate(FILE_LIST):
+        read_data(file_path)
+        print('读入文件...', n, file_path)
+        if n < len(FILE_LIST) - 1:
+            cal()
+            print("文件'test.csv'已写入。")
+        elif n == len(FILE_LIST) - 1:
+            final_cal()
 
     # 初始化石墨烯片层列表
     GRAPHENES = []
