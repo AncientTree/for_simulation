@@ -450,7 +450,7 @@ else:
         print('读入文件...', n, file_path)
         if n < len(FILE_LIST) - 1:
             cal()
-            print("文件'test.csv'已写入。")
+            # print("文件'test.csv'已写入。")
         elif n == len(FILE_LIST) - 1:
             final_cal()
         
