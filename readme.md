@@ -55,3 +55,35 @@ pcc可以去除第五列的字母，称“预处理”。预处理必须使用�
 `$ -adl FileName.gro 10000 20000 10 OutName.gro`
 表示把FileName.gro文件从第10000行到20000行的前面数字如 1TOL 改成 11TOL （数字加上10）并将文件输出到OutName
 
+
+
+## 3. Q&A
+
+1. 我如何将pcc的目录添加到Linux环境变量？
+
+   修改home/.profile文件，在文件末尾添加如下内容：
+
+   ```bash
+   export PATH="$PATH:~/simulation/wu-graphene/myapp/for_simulation"
+   ```
+
+   保存退出，此后你可能需要重新登录用户才会使其生效。
+
+   ​
+
+2. 报错权限不够？
+
+   ```bash
+   $ pcc
+   bash: /home/.../.../for_simulation/pcc: 权限不够
+   ```
+
+   要想将pcc作为一个命令，需要手动将pcc赋予可执行权限
+
+   在`/home/.../.../for_simulation/`目录下运行如下指令
+
+   ```bash
+   chmod +x pcc
+   ```
+
+   即可完成对pcc添加可执行权限，psub权限不够解决方式相似。

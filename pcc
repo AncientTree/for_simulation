@@ -22,14 +22,14 @@ terminal_columns, terminal_lines = os.get_terminal_size()
 
 name = '=    PCC    ='
 print()
-print("-"*terminal_columns+'\n')
+print('\n\n')
 
 
 print(name.center(terminal_columns-1))
 
 
 print("Version 2018.06.27".center(terminal_columns-1))
-print('\n\n'+"-"*terminal_columns)
+print('\n\n')
 
 # print("\n===========\n= 程序pcc =\n===========\n")
 
