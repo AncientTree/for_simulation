@@ -59,7 +59,7 @@ pcc可以去除第五列的字母，称“预处理”。预处理必须使用�
 
 有时需要把gro文件的第一列的某些残基序号数字加大，比如 1DDR-28DDT 要改成 2DDR-29DDT，如果文件发到windows上用notepad++改，操作实在太繁琐，而且notepad++使用内存有限，文本量大时容易出错。
 
-`$ -adl FileName.gro 10000 20000 10 OutName.gro`
+`$ psub -adl FileName.gro 10000 20000 10 OutName.gro`
 
 表示把FileName.gro文件从第10000行到20000行的前面数字如 1TOL 改成 11TOL （数字加上10）并将文件输出到OutName
 
