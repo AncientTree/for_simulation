@@ -53,6 +53,17 @@ pcc可以去除第五列的字母，称“预处理”。预处理必须使用�
 
 
 
+added in 2021/05/07:
+
+### 1.4注意
+工作目录/终端所在目录须与`*.pdb`文件所在目录相同。
+
+因为 `-f` 后跟的参数必须是 `n-a-55-4-10-` 样式，不能是 `./n-a-55-4-10-` 样式，更不能是 `xx/xx/n-a-55-4-10-` 样式。
+
+如果 `-f` 后跟的参数有空格，可用引号包起来：`-f "n a 55 4 10 "` ，但最好不在文件(夹)名引入空格。
+
+end added in 2021/05/07.
+
 
 ## 2. psub:
 有多种模式，其中-adl应用场景较常见
@@ -95,3 +106,20 @@ pcc可以去除第五列的字母，称“预处理”。预处理必须使用�
    ```
 
    即可完成对pcc添加可执行权限，psub权限不够解决方式相似。
+3. pcc 报错：
+```
+ Traceback (most recent call last):
+  File "pcc", line 484, in <module>
+    read_data(file_path)
+  File "pcc", line 140, in read_data
+    if int(sl[4]) == s:
+ValueError: invalid literal for int() with base 10: 'X'
+```
+
+是因为文件里有多余的字母，需要先执行预处理，命令示例：`pcc -pretreatment -f n-a-55-4-10-`
+
+### 更新记录
+
+2021/05/07：
+
+新增对7*x大小石墨烯的支持。

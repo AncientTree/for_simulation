@@ -76,9 +76,11 @@ FILE_PATH = os.getcwd()
 # 列表：所有待处理的文件，用re来获取
 FILE_LIST = []
 for file in os.listdir(FILE_PATH):
+
     match = re.match(FILE_PREFIX + '[0-9]*.pdb', file)
     if str(match) != 'None':
         FILE_LIST.append(os.path.join(FILE_PATH, match.group()))
+        # print(file)
 
 re_digits = re.compile(r'(\d+)')
 
@@ -210,6 +212,28 @@ def corner_5(cl) -> list:
     point_list = [pa, pb, pc, pd]  # 用来盛放四个角点并返回
     return point_list
 
+def corner_7(cl)-> list:
+    """
+    接收单层石墨烯的碳原子列表，计算得到四个Point对象
+    :param cl: 单层石墨烯的碳原子列表，相当于前面的{list}sheep_c_list、{list}GRACS[X]
+    :return: 四个Point对象的list
+    """
+    k = len(cl)  # 这一层有k个碳原子
+    c0 = cl[0]
+    c3 = cl[2]  # 第3个碳原子
+    c24 = cl[23]  # 第24个碳原子
+
+    cn0= cl[k-1] #倒数第1个C原子
+    cn3 = cl[k - 3]  # 倒数第3个碳原子
+    cn24 = cl[k - 24]  # 倒数第24个碳原子
+
+    # index = 0 的点的x，=2的点的z, 两者y的平均值
+    pa = Point(c0.x, c3.z, (c3.y + c0.y)/2 )
+    pb = Point(c24.x, c24.z, c24.y)
+    pc = Point(cn0.x , cn3.z, (cn3.y + cn0.y)/2)
+    pd = Point(cn24.x, cn24.z, cn24.y)
+    point_list = [pa, pb, pc, pd]  # 用来盛放四个角点并返回
+    return point_list
 
 def corner_10(cl) -> list:
     """
@@ -246,6 +270,12 @@ def read_5():
         corner_list.append(l)
     # print('a')
 
+def read_7():
+    for i in range(len(GRACS)):
+        l = corner_7(GRACS[i])
+        corner_list.append(l)
+    # print('a')
+
 
 def read_10():
     for i in range(len(GRACS)):
@@ -265,6 +295,8 @@ def final_cal():
         read_3()
     elif SIZE == '5':
         read_5()
+    elif SIZE == '7':
+        read_7()
     elif SIZE == '10':
         read_10()
     else:
@@ -336,10 +368,13 @@ def final_cal():
 
     
 def cal():
+    # print("选择读取方法。")
     if SIZE == '3':
         read_3()
     elif SIZE == '5':
         read_5()
+    elif SIZE == '7':
+        read_7()
     elif SIZE == '10':
         read_10()
     else:
@@ -362,7 +397,7 @@ def cal():
 
     for i in range(len(GRAPHENES) - 1):
         GRABOXES.append(Box(GRAPHENES[i], GRAPHENES[i + 1]))
-        # print("\r第%d、%d层石墨烯构成了一个盒子。" % (i + 1, i + 2))
+        print("\r第%d、%d层石墨烯构成了一个盒子。" % (i + 1, i + 2))
         outlines.append("\r\r\r[  Box%d  ]" % (i + 1))
         outlines.append("\r#第%d、%d层石墨烯构成的一个盒子。" % (i + 1, i + 2))
 
@@ -443,7 +478,7 @@ else:
         writer = csv.writer(f)
         writer.writerow(["Mol Num in Boxes:"])
 
-
+    # print(len(FILE_LIST))
 
     for n, file_path in enumerate(FILE_LIST):
         read_data(file_path)
