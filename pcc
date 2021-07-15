@@ -28,7 +28,7 @@ print('\n\n')
 print(name.center(terminal_columns-1))
 
 
-print("Version 2021.05.07".center(terminal_columns-1))
+print("Version 2021.07.15".center(terminal_columns-1))
 print('\n\n')
 
 # print("\n===========\n= 程序pcc =\n===========\n")
@@ -253,6 +253,29 @@ def corner_10(cl) -> list:
     point_list = [pa, pb, pc, pd]  # 用来盛放四个角点并返回
     return point_list
 
+def corner_x(cl, x: int):
+    """
+        接收单层石墨烯的碳原子列表，计算得到四个Point对象
+        :param cl: 单层石墨烯的碳原子列表，相当于前面的{list}sheep_c_list、{list}GRACS[X]
+        :param x: 从原子序号0-10这条边有多少个环，相当于以前的 3/5/7/10
+        :return: 四个Point对象的list
+        """
+    # 定义按原子index的第一条边上，除第3个原子(index=2)之外的第二个定点的序号
+    # 实际上是等于4(x-1)  如 3--8,5--16,7--24,10--36
+    n = 4*(x-1)
+
+    
+    k = len(cl)  # 这一层有k个碳原子
+    corner_1 = cl[2]  # 第3个碳原子
+    corner_2 = cl[n-1]  # 第n个碳原子
+    corner_4 = cl[k - 3]  # 倒数第3个碳原子
+    corner_3 = cl[k - n]  # 倒数第n个碳原子
+    pa = Point(corner_1.x - (corner_2.x - corner_1.x) / 12.5, corner_1.z - (corner_2.z - corner_1.z) / 12.5, corner_1.y - (corner_2.y - corner_1.y) / 12.5)
+    pb = Point(corner_2.x - (corner_1.x - corner_2.x) / 50, corner_2.z - (corner_1.z - corner_2.z) / 50, corner_2.y - (corner_1.y - corner_2.y) / 50)
+    pc = Point(corner_4.x - (corner_3.x - corner_4.x) / 12.5, corner_4.z - (corner_3.z - corner_4.z) / 12.5, corner_4.y - (corner_3.y - corner_4.y) / 12.5)
+    pd = Point(corner_3.x - (corner_4.x - corner_3.x) / 50, corner_3.z - (corner_4.z - corner_3.z) / 50, corner_3.y - (corner_4.y - corner_3.y) / 50)
+    point_list = [pa, pb, pc, pd]  # 用来盛放四个角点并返回
+    return point_list
 
 corner_list = []  # {list}corner_list是二维list，第一维是几个石墨烯片层，第二维是每一层的四个角点Point对象
 
@@ -284,6 +307,12 @@ def read_10():
     # print('a')
 
 
+def read_x(x: int):
+    for i in range(len(GRACS)):
+        l = corner_x(GRACS[i])
+        corner_list.append(l)
+
+
 # read_data('npt02-d-55-6-6.pdb')
 
 
@@ -291,6 +320,7 @@ def read_10():
 
 
 def final_cal():
+    """
     if SIZE == '3':
         read_3()
     elif SIZE == '5':
@@ -303,7 +333,8 @@ def final_cal():
         print("错误: 没有正确输入石墨烯尺寸参数。")
 
     # print("第一层石墨烯有%d个碳原子" % len(GRACS[0]))
-
+    """
+    read_x(int(SIZE))
     """
     for i in range(len(corner_list)):
         for j in range(4):
@@ -368,6 +399,8 @@ def final_cal():
 
     
 def cal():
+
+    """
     # print("选择读取方法。")
     if SIZE == '3':
         read_3()
@@ -379,8 +412,11 @@ def cal():
         read_10()
     else:
         print("错误: 没有正确输入石墨烯尺寸参数。")
+    """
 
     # print("第一层石墨烯有%d个碳原子" % len(GRACS[0]))
+
+    read_x(int(SIZE))
 
     """
     for i in range(len(corner_list)):
@@ -408,7 +444,7 @@ def cal():
         for j in range(len(CO2CS)):
             if GRABOXES[i].if_inside(CO2CS[j]):
                 n += 1
-                
+
                 # print("原子序号%d，残基序号%d，坐标[x, z, y] = %s。"
                 #       % (CO2CS[j].name,
                 #          CO2CS[j].mol_n,
